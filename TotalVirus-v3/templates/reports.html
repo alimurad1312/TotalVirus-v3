@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Threat Report #{{ scan.id }} — TotalVirus{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <div class="breadcrumb"><a href="{{ url_for('history') }}">&larr; Back to Detection Feed</a></div>
+        <h1>Threat Intelligence Report <span class="text-muted">#{{ scan.id }}</span></h1>
+    </div>
+    <a href="{{ url_for('index') }}" class="btn btn-cyan">
+        <i data-lucide="scan-line"></i> New Scan
+    </a>
+</div>
+
+<div class="report-banner {% if scan.risk_score == 0 %}banner-clean{% elif scan.risk_score < 75 %}banner-warn{% else %}banner-danger{% endif %}">
+    <div class="banner-left">
+        <div class="score-ring">
+            <span class="score-num">{{ scan.engines_detected.split('/')[0] }}</span>
+            <span class="score-max">/{{ scan.engines_detected.split('/')[1] }}</span>
+        </div>
+        <div>
+            <h2>{{ scan.result }}</h2>
+            <p>Vector: <strong>{{ scan.scan_type }}</strong> &bull; Analyzed on {{ scan.timestamp }} UTC</p>
+        </div>
+    </div>
+    <div>
+        {% if scan.risk_score == 0 %}
+            <span class="badge badge-clean badge-lg"><i data-lucide="shield-check"></i> No Security Vendors Flagged This</span>
+        {% elif scan.risk_score < 75 %}
+            <span class="badge badge-warn badge-lg"><i data-lucide="alert-triangle"></i> Heuristic Warning ({{ scan.risk_score }}/100)</span>
+        {% else %}
+            <span class="badge badge-danger badge-lg"><i data-lucide="skull"></i> High Threat Severity ({{ scan.risk_score }}/100)</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="card-header">
+        <h2><i data-lucide="file-text"></i> Indicator Telemetry & Cryptographic Fingerprint</h2>
+    </div>
+    <div class="meta-grid">
+        <div class="meta-item">
+            <span class="meta-label">Scan Vector</span>
+            <span class="meta-value">{{ scan.scan_type }}</span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-label">Target / Artifact</span>
+            <span class="meta-value">{{ scan.target }}</span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-label">Payload Size / Type</span>
+            <span class="meta-value">{{ scan.file_size }}</span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-label">Detection Ratio</span>
+            <span class="meta-value">{{ scan.engines_detected }} Engines</span>
+        </div>
+        <div class="meta-item meta-full">
+            <span class="meta-label">SHA-256 Digest</span>
+            <div class="hash-box">
+                <code>{{ scan.file_hash }}</code>
+                <button class="btn btn-outline btn-xs copy-btn" data-hash="{{ scan.file_hash }}">
+                    <i data-lucide="copy"></i> Copy SHA-256
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

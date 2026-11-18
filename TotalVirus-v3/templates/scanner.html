@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Scanner Console — TotalVirus{% endblock %}
+{% block content %}
+<div class="ti-hero" style="margin-top: 1rem;">
+    <div class="ti-pill">MULTI-VECTOR THREAT SCANNER</div>
+    <h1 class="ti-headline" style="font-size: 2.25rem;">Inspect Files, URLs, IPs & Hashes</h1>
+
+    <div class="scanner-console">
+        <div class="tab-bar" role="tablist">
+            {% for tab in ['FILE', 'URL', 'SEARCH', 'IP', 'DOMAIN', 'HASH'] %}
+            <button type="button" class="tab-btn {% if active_tab == tab %}active{% endif %}" data-tab="{{ tab }}">
+                {{ tab }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <div class="console-card">
+            <form method="POST" action="{{ url_for('scanner') }}" enctype="multipart/form-data" id="unified-scan-form">
+                <input type="hidden" name="scan_type" id="scan-type-input" value="{{ active_tab }}">
+
+                <div class="tab-panel {% if active_tab != 'FILE' %}hidden{% endif %}" id="panel-FILE">
+                    <div class="dropzone" id="dropzone">
+                        <input type="file" name="file" id="file-input" hidden>
+                        <div class="dropzone-content" id="dropzone-prompt">
+                            <div class="upload-cloud-icon"><i data-lucide="cloud-upload"></i></div>
+                            <h3>Drag & drop a suspicious file here</h3>
+                            <p>or <span class="browse-link">choose a file</span> from your device</p>
+                        </div>
+                        <div class="file-preview hidden" id="file-preview">
+                            <div class="preview-icon"><i data-lucide="file-check-2"></i></div>
+                            <div class="preview-details">
+                                <h4 id="selected-filename">file.bin</h4>
+                                <span id="selected-filesize" class="text-muted">0 KB</span>
+                            </div>
+                            <button type="button" class="btn-icon" id="clear-file"><i data-lucide="x"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-panel {% if active_tab == 'FILE' %}hidden{% endif %}" id="panel-INDICATOR">
+                    <div class="ioc-input-box">
+                        <label id="ioc-label" for="indicator-input">Enter {{ active_tab }} to inspect</label>
+                        <div class="ioc-field-wrap">
+                            <i data-lucide="radar"></i>
+                            <input type="text" name="indicator_value" id="indicator-input" placeholder="Enter target indicator...">
+                        </div>
+                        <span class="ioc-hint" id="ioc-hint">Real-time lookup against threat intelligence feeds.</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-cyan btn-lg btn-block" id="submit-scan">
+                    <i data-lucide="scan-search"></i> <span id="submit-btn-text">Analyze Target</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

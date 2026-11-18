@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="ti-hero">
+    <div class="ti-pill">THREAT INTELLIGENCE PLATFORM</div>
+    <h1 class="ti-headline">
+        Analyze URLs, domains, and<br>
+        suspicious files with real-time<br>
+        intelligence from the <span class="text-cyan">VirusTotal<br>API.</span>
+    </h1>
+
+    <div class="scanner-console">
+        <!-- 6-Tab Switcher matching the screenshot -->
+        <div class="tab-bar" role="tablist">
+            <button type="button" class="tab-btn active" data-tab="FILE">
+                <i data-lucide="file-text"></i> FILE
+            </button>
+            <button type="button" class="tab-btn" data-tab="URL">
+                <i data-lucide="globe"></i> URL
+            </button>
+            <button type="button" class="tab-btn" data-tab="SEARCH">
+                <i data-lucide="search"></i> SEARCH
+            </button>
+            <button type="button" class="tab-btn" data-tab="IP">
+                <i data-lucide="circle-dot"></i> IP
+            </button>
+            <button type="button" class="tab-btn" data-tab="DOMAIN">
+                <i data-lucide="network"></i> DOMAIN
+            </button>
+            <button type="button" class="tab-btn" data-tab="HASH">
+                <i data-lucide="hash"></i> HASH
+            </button>
+        </div>
+
+        <!-- Unified Scan Box -->
+        <div class="console-card">
+            <form method="POST" action="{{ url_for('scanner') }}" enctype="multipart/form-data" id="unified-scan-form">
+                <input type="hidden" name="scan_type" id="scan-type-input" value="FILE">
+
+                <!-- FILE Panel -->
+                <div class="tab-panel active" id="panel-FILE">
+                    <div class="dropzone" id="dropzone">
+                        <input type="file" name="file" id="file-input" hidden>
+                        <div class="dropzone-content" id="dropzone-prompt">
+                            <div class="upload-cloud-icon">
+                                <i data-lucide="cloud-upload"></i>
+                            </div>
+                            <h3>Drag & drop a suspicious file here</h3>
+                            <p>or <span class="browse-link">choose a file</span> to compute SHA-256 & scan across 70+ engines</p>
+                        </div>
+
+                        <div class="file-preview hidden" id="file-preview">
+                            <div class="preview-icon"><i data-lucide="file-check-2"></i></div>
+                            <div class="preview-details">
+                                <h4 id="selected-filename">payload.exe</h4>
+                                <span id="selected-filesize" class="text-muted">0 KB</span>
+                            </div>
+                            <button type="button" class="btn-icon" id="clear-file" title="Remove file">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IOC Input Panel (URL, SEARCH, IP, DOMAIN, HASH) -->
+                <div class="tab-panel hidden" id="panel-INDICATOR">
+                    <div class="ioc-input-box">
+                        <label id="ioc-label" for="indicator-input">Enter URL to inspect</label>
+                        <div class="ioc-field-wrap">
+                            <i data-lucide="radar" id="ioc-icon"></i>
+                            <input type="text" name="indicator_value" id="indicator-input" placeholder="https://example.com/suspicious-path">
+                        </div>
+                        <span class="ioc-hint" id="ioc-hint">Queries domain reputation, phishing blacklists, and malware distribution feeds.</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-cyan btn-lg btn-block" id="submit-scan">
+                    <i data-lucide="scan-search"></i> <span id="submit-btn-text">Analyze File Now</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+{% if recent_feed %}
+<section class="feed-preview-section">
+    <div class="section-top">
+        <h2><i data-lucide="radio"></i> Recent Telemetry Detections</h2>
+        <a href="{{ url_for('history') }}" class="link-cyan">View Full Feed &rarr;</a>
+    </div>
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Target / Artifact</th>
+                    <th>Engines</th>
+                    <th>Verdict</th>
+                    <th>Timestamp</th>
+                    <th class="text-right">Report</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in recent_feed %}
+                <tr>
+                    <td><span class="type-tag">{{ item.scan_type }}</span></td>
+                    <td class="target-cell">{{ item.target }}</td>
+                    <td><code>{{ item.engines_detected }}</code></td>
+                    <td>
+                        {% if item.risk_score == 0 %}
+                            <span class="badge badge-clean"><i data-lucide="check-circle"></i> Clean</span>
+                        {% elif item.risk_score < 75 %}
+                            <span class="badge badge-warn"><i data-lucide="alert-triangle"></i> Suspicious</span>
+                        {% else %}
+                            <span class="badge badge-danger"><i data-lucide="skull"></i> Malicious</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted">{{ item.timestamp }}</td>
+                    <td class="text-right">
+                        <a href="{{ url_for('reports', scan_id=item.id) }}" class="btn btn-outline btn-xs">Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Sign In — TotalVirus{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo"><i data-lucide="lock"></i></div>
+            <h2>Analyst Sign In</h2>
+            <p>Authenticate to access your security dashboard.</p>
+        </div>
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-with-icon">
+                    <i data-lucide="user"></i>
+                    <input type="text" id="username" name="username" placeholder="Enter username" required autofocus>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-with-icon">
+                    <i data-lucide="key-round"></i>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    <button type="button" class="toggle-pw" onclick="togglePassword('password', this)">
+                        <i data-lucide="eye"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-cyan btn-block">Sign In</button>
+        </form>
+        <div class="auth-footer">
+            Need an analyst account? <a href="{{ url_for('register') }}">Register here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

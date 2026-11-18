@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Analyst Dashboard — TotalVirus{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Security Operations Dashboard</h1>
+        <p class="text-muted">Welcome back, <strong>{{ current_user.username }}</strong>. Threat telemetry is active.</p>
+    </div>
+    <a href="{{ url_for('index') }}" class="btn btn-cyan">
+        <i data-lucide="plus-circle"></i> New Threat Scan
+    </a>
+</div>
+
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-label">Total Indicators Scanned</span>
+            <div class="kpi-icon icon-cyan"><i data-lucide="radar"></i></div>
+        </div>
+        <div class="kpi-value">{{ stats.total }}</div>
+        <div class="kpi-trend">Files, URLs, IPs & Domains</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-label">Clean / Safe</span>
+            <div class="kpi-icon icon-emerald"><i data-lucide="shield-check"></i></div>
+        </div>
+        <div class="kpi-value text-emerald">{{ stats.clean }}</div>
+        <div class="kpi-trend">0 engine detections</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-label">Suspicious / Malicious</span>
+            <div class="kpi-icon icon-amber"><i data-lucide="alert-triangle"></i></div>
+        </div>
+        <div class="kpi-value text-amber">{{ stats.flagged }}</div>
+        <div class="kpi-trend">Flagged by heuristics / API</div>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="card-header">
+        <h2><i data-lucide="activity"></i> Recent Analyst Scans</h2>
+        <a href="{{ url_for('history') }}" class="link-cyan">View Full Detection Feed &rarr;</a>
+    </div>
+    {% if scans %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Vector</th>
+                        <th>Target</th>
+                        <th>SHA-256 Digest</th>
+                        <th>Engines</th>
+                        <th>Verdict</th>
+                        <th>Timestamp</th>
+                        <th class="text-right">Report</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scan in scans %}
+                    <tr>
+                        <td><span class="type-tag">{{ scan.scan_type }}</span></td>
+                        <td class="target-cell">{{ scan.target }}</td>
+                        <td>
+                            <div class="hash-cell">
+                                <code>{{ scan.file_hash[:16] }}...</code>
+                                <button class="btn-icon copy-btn" data-hash="{{ scan.file_hash }}" title="Copy SHA-256">
+                                    <i data-lucide="copy"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td><code>{{ scan.engines_detected }}</code></td>
+                        <td>
+                            {% if scan.risk_score == 0 %}
+                                <span class="badge badge-clean"><i data-lucide="check-circle"></i> Clean</span>
+                            {% elif scan.risk_score < 75 %}
+                                <span class="badge badge-warn"><i data-lucide="alert-triangle"></i> Suspicious</span>
+                            {% else %}
+                                <span class="badge badge-danger"><i data-lucide="skull"></i> Malicious</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">{{ scan.timestamp }}</td>
+                        <td class="text-right">
+                            <a href="{{ url_for('reports', scan_id=scan.id) }}" class="btn btn-outline btn-xs">Inspect</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i data-lucide="inbox"></i></div>
+            <h3>No Scans Recorded Yet</h3>
+            <p>Submit a file, URL, IP, or hash on the Scanner Hub to see telemetry here.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-cyan">Go to Scanner Hub</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

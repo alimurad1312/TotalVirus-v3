@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Live Detection Feed — TotalVirus{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Live Detection Feed</h1>
+        <p class="text-muted">Real-time ledger of scanned files, URLs, domains, IPs, and hashes.</p>
+    </div>
+    <div class="search-box">
+        <i data-lucide="search"></i>
+        <input type="text" id="history-search" placeholder="Filter target, type, or SHA-256...">
+    </div>
+</div>
+
+<div class="table-card">
+    {% if scans %}
+        <div class="table-responsive">
+            <table class="data-table" id="history-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Vector</th>
+                        <th>Target</th>
+                        <th>SHA-256 Digest</th>
+                        <th>Engines</th>
+                        <th>Verdict</th>
+                        <th>Timestamp</th>
+                        <th class="text-right">Report</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scan in scans %}
+                    <tr>
+                        <td class="text-muted">#{{ scan.id }}</td>
+                        <td><span class="type-tag">{{ scan.scan_type }}</span></td>
+                        <td class="target-cell">{{ scan.target }}</td>
+                        <td>
+                            <div class="hash-cell">
+                                <code>{{ scan.file_hash[:18] }}...</code>
+                                <button class="btn-icon copy-btn" data-hash="{{ scan.file_hash }}" title="Copy SHA-256">
+                                    <i data-lucide="copy"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td><code>{{ scan.engines_detected }}</code></td>
+                        <td>
+                            {% if scan.risk_score == 0 %}
+                                <span class="badge badge-clean"><i data-lucide="check-circle"></i> Clean</span>
+                            {% elif scan.risk_score < 75 %}
+                                <span class="badge badge-warn"><i data-lucide="alert-triangle"></i> Suspicious</span>
+                            {% else %}
+                                <span class="badge badge-danger"><i data-lucide="skull"></i> Malicious</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">{{ scan.timestamp }}</td>
+                        <td class="text-right">
+                            <a href="{{ url_for('reports', scan_id=scan.id) }}" class="btn btn-outline btn-xs">Inspect</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i data-lucide="radar"></i></div>
+            <h3>Detection Feed is Empty</h3>
+            <p>No threat indicators have been analyzed yet.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-cyan">Start Scanning</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
